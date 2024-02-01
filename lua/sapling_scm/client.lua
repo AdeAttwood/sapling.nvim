@@ -10,7 +10,7 @@ local client = {}
 --
 ---@return HeadInfo
 client.head_info = function()
-  local head_info = vim.fn.system([[sl log -r '.' -T"{dict(remotenames,node,peerurls)|json}"]])
+  local head_info = vim.fn.system [[sl log -r '.' -T"{dict(remotenames,node,peerurls)|json}"]]
   return vim.json.decode(head_info)
 end
 
