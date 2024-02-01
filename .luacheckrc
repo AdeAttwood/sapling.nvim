@@ -7,4 +7,4 @@ codes = true
 self = false
 
 -- Global objects defined by the C code
-read_globals = { "vim" }
+read_globals = { "vim", "describe", "it", "assert" }
