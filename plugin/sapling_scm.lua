@@ -1,5 +1,22 @@
 local client = require "sapling_scm.client"
 local remote_url = require "sapling_scm.remote_url"
+local fs = require "sapling_scm.fs"
+
+vim.api.nvim_create_autocmd("BufReadCmd", {
+  pattern = { "sl://*" },
+  callback = function(event)
+    fs.handle(event.file, event.buf)
+  end,
+  desc = "Sapling SCM URL handler",
+})
+
+vim.api.nvim_create_user_command("Sshow", function(props)
+  vim.cmd("edit sl://show/" .. props.args)
+end, { nargs = "+", desc = "Browse the current object on the remote url" })
+
+vim.api.nvim_create_user_command("Slog", function(props)
+  vim.cmd("edit sl://log/" .. props.args)
+end, { nargs = "+", desc = "Browse the current object on the remote url" })
 
 vim.api.nvim_create_user_command("Sbrowse", function(props)
   local file = vim.fn.expand "%"
