@@ -26,6 +26,21 @@ vim.api.nvim_create_user_command("Slog", function(props)
   vim.cmd("edit sl://log/" .. props.args)
 end, { nargs = "+", desc = "Browse the current object on the remote url" })
 
+vim.api.nvim_create_user_command("Sannotate", function()
+  local width, annotations = client.annotate(".", vim.api.nvim_buf_get_name(0))
+
+  vim.cmd "set cursorbind"
+
+  vim.cmd(string.format("vert topleft split | vertical resize %d | e /tmp/annotations", width))
+  vim.api.nvim_buf_set_option(0, "buftype", "nofile")
+  vim.api.nvim_win_set_option(0, "number", false)
+  vim.api.nvim_win_set_option(0, "relativenumber", false)
+  vim.api.nvim_win_set_option(0, "signcolumn", "no")
+
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, annotations)
+  vim.cmd "set cursorbind"
+end, { desc = "Browse the current object on the remote url" })
+
 vim.api.nvim_create_user_command("Sbrowse", function(props)
   local file = vim.fn.expand "%"
   local start_line = props.line1
