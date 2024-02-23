@@ -1,6 +1,7 @@
 local client = require "sapling_scm.client"
 local remote_url = require "sapling_scm.remote_url"
 local fs = require "sapling_scm.fs"
+local log_actions = require "sapling_scm.log_actions"
 
 vim.api.nvim_create_autocmd("BufReadCmd", {
   pattern = { "sl://*" },
@@ -8,6 +9,13 @@ vim.api.nvim_create_autocmd("BufReadCmd", {
     fs.handle(event.file, event.buf)
   end,
   desc = "Sapling SCM URL handler",
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "saplinglog",
+  callback = function(args)
+    vim.keymap.set("n", "<CR>", log_actions.show_current_hash, { buffer = args.buf })
+  end,
 })
 
 vim.api.nvim_create_user_command("Sshow", function(props)
