@@ -27,6 +27,8 @@ require "plugin.sapling_scm"
 
 vim.opt.rtp:append(vim.fn.getcwd())
 
+require "plugin.sapling_scm"
+
 for _, file in ipairs(test_files) do
   require(file:gsub(".lua", ""))
 end
