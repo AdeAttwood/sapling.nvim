@@ -18,15 +18,14 @@ busted.subscribe({ "failure" }, function()
 end)
 
 busted.subscribe({ "exit" }, function()
-  if exit_code ~= 0 then
-    print "\n"
-    os.exit(exit_code)
-  end
+  os.exit(exit_code)
 
   return nil, true
 end)
 
 vim.opt.rtp:append(vim.fn.getcwd())
+
+require "plugin.sapling_scm"
 
 for _, file in ipairs(test_files) do
   require(file:gsub(".lua", ""))
