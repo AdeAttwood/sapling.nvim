@@ -26,6 +26,8 @@ busted.subscribe({ "exit" }, function()
   return nil, true
 end)
 
+vim.opt.rtp:append(vim.fn.getcwd())
+
 for _, file in ipairs(test_files) do
   require(file:gsub(".lua", ""))
 end
