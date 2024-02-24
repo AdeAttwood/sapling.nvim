@@ -18,6 +18,16 @@ jobs:
       - name: Install busted
         run: sudo luarocks install busted
 
+      - name: Download sapling
+        uses: robinraju/release-downloader@v1.9
+        with:
+          repository: "facebook/sapling"
+          latest: true
+          fileName: "*amd64.Ubuntu22.04.deb"
+
+      - name: Install sapling
+        run: sudo dpkg --install *.deb
+
       - name: Install neovim
         run: |
           test -d _neovim || {
@@ -25,12 +35,17 @@ jobs:
             curl -sL "https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz" | tar xzf - --strip-components=1 -C "${PWD}/_neovim"
           }
 
+      - name: Clone the sapling.nvim repo
+        run: sl clone --git https://github.com/AdeAttwood/sapling.nvim.git _sapling.nvim
+
       - name: Run tests
         run: |
           export PATH="${PWD}/_neovim/bin:${PATH}"
           export VIM="${PWD}/_neovim/share/nvim/runtime"
+
+          cd _sapling.nvim
+
+          sl config --local ui.logtemplate ' {graphnode} {node|short} {truncatelonglines(desc|firstline, 80)} ({date|age}) <{author|person}> {if(github_pull_request_number, "PR #{github_pull_request_number}")}\n'
+
           nvim --version
-
-          nvim -l ./lua/sapling_scm_tests/init.lua
-
-
+          nvim -l ../lua/sapling_scm_tests/init.lua
