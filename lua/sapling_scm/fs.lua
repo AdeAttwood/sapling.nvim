@@ -36,6 +36,15 @@ local parse_url = function(url)
     return { action = "log", pattern = log_matches }
   end
 
+  local diff_matcehs = url:match "sl://diff/(.*)"
+  if diff_matcehs then
+    return { action = "diff", pattern = diff_matcehs }
+  end
+
+  if url == "sl://status" then
+    return { action = "status" }
+  end
+
   -- No handler for this url is found
   return nil
 end
@@ -83,6 +92,22 @@ local handle = function(url, buf)
     vim.api.nvim_buf_set_option(buf, "filetype", "saplinglog")
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, log)
     highlight_buffer(buf)
+  end
+
+  if action.action == "diff" then
+    local diff = client.diff(action.pattern)
+    vim.api.nvim_buf_set_option(buf, "filetype", "diff")
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, diff)
+  end
+
+  if action.action == "status" then
+    local status = client.status()
+    vim.api.nvim_buf_set_option(buf, "filetype", "saplingstatus")
+
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "# Sapling status" })
+    for i, item in ipairs(status) do
+      vim.api.nvim_buf_set_lines(buf, i, -1, false, { item.status .. " " .. item.path })
+    end
   end
 end
 

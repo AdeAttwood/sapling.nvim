@@ -69,4 +69,34 @@ client.annotate = function(ref, file)
   return width, result
 end
 
+-- Run the diff command and return the output as a list of strings. If no param
+-- is passed then it will return the diff of your current changes.
+--
+---@param ref string | nil
+---@return string[]
+client.diff = function(ref)
+  if not ref or ref == "" then
+    return vim.fn.systemlist "sl diff --git"
+  end
+
+  return vim.fn.systemlist(string.format("sl diff %s", ref))
+end
+
+client.STATUS_MODIFIED = "M"
+client.STATUS_ADDED = "A"
+client.STATUS_UNTRACKED = "?"
+client.STATUS_REMOVED = "R"
+
+---@alias Status "M" | "A" | "?" | "R"
+
+---@class StatusItem
+---@field status Status
+---@field path string
+
+-- Returns output of `sl status` as an array..
+---@return StatusItem[]
+client.status = function()
+  return vim.json.decode(vim.fn.system "sl status -Tjson")
+end
+
 return client

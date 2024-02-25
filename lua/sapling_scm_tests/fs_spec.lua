@@ -82,3 +82,49 @@ describe("Sshow", function()
     end)
   end)
 end)
+
+describe("Sdiff", function()
+  vim.fn.system "echo 'This is a line added' >> README.md"
+
+  local _, lines = run_command "Sdiff"
+
+  teardown(function()
+    vim.fn.system "sl revert README.md"
+  end)
+
+  it("has the line that has been changed in the output", function()
+    local found = false
+    for _, line in ipairs(lines) do
+      if line == "+This is a line added" then
+        found = true
+      end
+    end
+
+    assert.is_true(found)
+  end)
+end)
+
+describe("Sstatus", function()
+  vim.fn.system "echo 'This is a line added' >> README.md"
+
+  local _, lines = run_command "Sstatus"
+
+  teardown(function()
+    vim.fn.system "sl revert README.md"
+  end)
+
+  it("has the file in the buffer", function()
+    local found = false
+    for _, line in ipairs(lines) do
+      if line == "M README.md" then
+        found = true
+      end
+    end
+
+    assert.is_true(found)
+  end)
+
+  it("has the saplingstatus filetype", function()
+    assert.is_equal("saplingstatus", vim.bo.filetype)
+  end)
+end)
