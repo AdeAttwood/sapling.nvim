@@ -15,6 +15,8 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = "saplinglog",
   callback = function(args)
     vim.keymap.set("n", "<CR>", log_actions.show_current_hash, { buffer = args.buf })
+    vim.keymap.set("n", "<C-e>", log_actions.metaedit, { buffer = args.buf })
+    vim.keymap.set("n", "<C-c>", log_actions.commit, { buffer = args.buf })
   end,
 })
 
@@ -40,6 +42,8 @@ vim.api.nvim_create_user_command("Sannotate", function()
   vim.api.nvim_buf_set_lines(0, 0, -1, false, annotations)
   vim.cmd "set cursorbind"
 end, { desc = "Browse the current object on the remote url" })
+
+vim.api.nvim_create_user_command("Scommit", log_actions.commit, { desc = "Commit all your current changes" })
 
 vim.api.nvim_create_user_command("Sbrowse", function(props)
   local file = vim.fn.expand "%"
