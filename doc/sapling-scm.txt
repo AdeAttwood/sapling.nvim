@@ -1,0 +1,97 @@
+*sapling-scm.txt*                  Plugin for working with Sapling SCM in NVIM
+
+==============================================================================
+CONTENTS                                                *sapling-scm-contents*
+
+1. Intro                                                   |sapling-scm-intro|
+2. Commands                                             |sapling-scm-commands|
+  2.1 Sshow                                                |sapling-scm-sshow|
+  2.2 Slog                                                  |sapling-scm-slog|
+  2.3 Sdiff                                                |sapling-scm-sdiff|
+  2.4 Sstatus                                            |sapling-scm-sstatus|
+  2.5 Sannotate                                        |sapling-scm-sannotate|
+  2.6 Scommit                                            |sapling-scm-scommit|
+  2.7 Sbrowse                                            |sapling-scm-sbrowse|
+3. Log Actions                                       |sapling-scm-log-actions|
+  3.1 View                                              |sapling-scm-log-view|
+  3.2 Metaedit                                      |sapling-scm-log-metaedit|
+
+==============================================================================
+INTRO                                                     *sapling-scm-intro*
+
+Sapling SCM NVIM is a plugin to run sapling commands from inside nvim. Its
+quite often that you will run a log command, have to copy a node, then run
+another command with that node. Once you have run your next command, you will
+sometimes lose your log output and have to run the command again. This plugin
+tries to make that experience better. It's inspired by vim-fugitive and the
+isl built into sapling.
+
+- https://sapling-scm.com/
+- https://github.com/AdeAttwood/sapling.nvim
+
+==============================================================================
+COMMANDS                                                *sapling-scm-commands*
+
+Sshow {node}                                               *sapling-scm-sshow*
+
+Sshow will run `sl show` command with the provided node id. This will put the
+output in a new buffer with the commit description at the top in comments. The
+buffer will have the file type of diff to give you the highlighting.
+
+Slog {revset}                                               *sapling-scm-slog*
+
+Run the log command and put the command output into a new buffer. You can
+supply a revset that will be used to filter the log. For now this will use the
+default output of the log command so the output template can be configured
+with `ui.logtemplate` in your sapling config.
+
+If you have `baleia.nvim` installed all the ANSI escape sequences will be
+colorized in your output as they would in the terminal so you can keep your
+output looking consistent.
+
+https://github.com/m00qek/baleia.nvim
+
+While you are on this buffer you can run different actions on a commit. For
+more info please see |sapling-scm-log-actions|
+
+Sdiff [node]                                               *sapling-scm-sdiff*
+
+Display the output of the diff command in a buffer. If no arguments are passed
+in then it will show the diff of the current changes. Any arguments passed are
+forwarded to the diff command.
+
+Sstatus                                                  *sapling-scm-sstatus*
+
+Put the output of `sl status` in a buffer.
+
+Sannotate                                              *sapling-scm-sannotate*
+
+Put the run the `sl annotate` command and put the output of the command in a
+buffer to the left of the current one. This will use `cursorbind` to keep the
+two buffers in sync and you will be able to see the change the line was part
+of.
+
+Scommit                                                  *sapling-scm-scommit*
+
+Commit all of your current changes. This will call the commit command and open
+the message file in a new buffer. When the buffer is closed then the commit
+command will continue. The commit command is called with the `-v` flag so all
+of the changes you will be committing will be at the bottom of the buffer.
+
+Sbrowse                                                  *sapling-scm-sbrowse*
+
+Open the current point in the browser. If you are in normal mode, it will open
+the browser to the file on your current line. If you are in visual mode it
+will open the file and highlighting the current range. The blob reference will
+be inferred from your current remote name that is linked to your current
+commit, falling back to the node.
+
+NOTE: Currently only GitHub is supported
+
+==============================================================================
+LOG ACTIONS                                          *sapling-scm-log-actions*
+
+View      <CR>                                          |sapling-scm-log-view|
+Metaedit  <C-e>                                     |sapling-scm-log-metaedit|
+
+vim:tw=78:ts=8:noet:ft=help:norl:
