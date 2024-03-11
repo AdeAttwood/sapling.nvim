@@ -92,6 +92,14 @@ NOTE: Currently only GitHub is supported
 LOG ACTIONS                                          *sapling-scm-log-actions*
 
 View      <CR>                                          |sapling-scm-log-view|
+
+When you are on the log, you can push return on a line that includes a commit
+hash to view it. This will open the diff view for that commit in a new buffer.
+This will be the same as opening `sl://show/123
+
 Metaedit  <C-e>                                     |sapling-scm-log-metaedit|
+
+Editing the metadata of a commit will open a new buffer with old metadata in
+it. When you then save and close the buffer the metadata will be updated.
 
 vim:tw=78:ts=8:noet:ft=help:norl:
