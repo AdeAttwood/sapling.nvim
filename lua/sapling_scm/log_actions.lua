@@ -26,6 +26,11 @@ actions.bookmark = function()
   end)
 end
 
+actions.go_to = function()
+  local hash = get_hash_from_line()
+  editor_command.run(string.format("sl goto -r '%s'", hash))
+end
+
 actions.commit = function()
   editor_command.run "sl commit -v"
 end
