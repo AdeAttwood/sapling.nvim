@@ -16,6 +16,16 @@ actions.metaedit = function()
   editor_command.run(string.format("sl metaedit -r '%s'", hash))
 end
 
+actions.bookmark = function()
+  local hash = get_hash_from_line()
+  vim.ui.input({ prompt = "Bookmark name for " .. hash .. ": " }, function(name)
+    if name then
+      editor_command.run(string.format("sl bookmark -f -r '%s' '%s'", hash, name))
+      vim.cmd "edit %"
+    end
+  end)
+end
+
 actions.commit = function()
   editor_command.run "sl commit -v"
 end
