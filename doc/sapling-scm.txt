@@ -15,6 +15,7 @@ CONTENTS                                                *sapling-scm-contents*
 3. Log Actions                                       |sapling-scm-log-actions|
   3.1 View                                              |sapling-scm-log-view|
   3.2 Metaedit                                      |sapling-scm-log-metaedit|
+  3.3 Bookmark                                      |sapling-scm-log-bookmark|
 
 ==============================================================================
 INTRO                                                     *sapling-scm-intro*
@@ -101,5 +102,14 @@ Metaedit  <C-e>                                     |sapling-scm-log-metaedit|
 
 Editing the metadata of a commit will open a new buffer with old metadata in
 it. When you then save and close the buffer the metadata will be updated.
+
+Bookmark  <C-b>                                     |sapling-scm-log-bookmark|
+
+Add a bookmark to a commit. When using the keybinding it will ask you to input
+the bookmark name. One you have given your name its will apply the bookmark
+using `sl bookmark` behind the scenes.
+
+NOTE: If you are using tmux with <C-b> as the leader key, you may been to use
+<C-bb> to add a bookmark.
 
 vim:tw=78:ts=8:noet:ft=help:norl:
