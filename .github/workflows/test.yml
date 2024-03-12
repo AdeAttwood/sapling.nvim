@@ -9,15 +9,6 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install luarocks
-        run: sudo apt update && sudo apt install -y luarocks
-
-      - name: Install busted
-        run: sudo luarocks install busted
-
       - name: Download sapling
         uses: robinraju/release-downloader@v1.9
         with:
@@ -28,6 +19,23 @@ jobs:
       - name: Install sapling
         run: sudo dpkg --install *.deb
 
+      - name: Clean up the sapling deb file
+        run: rm ./*.deb
+
+      - name: Clone the repo
+        run: |
+          sl clone --git "https://github.com/${{ github.repository }}.git" ${{ github.workspace }}
+
+          head_node="$(sl log -r '.' -T"{node}")"
+          sl goto "${{ github.sha }}"
+          sl rebase -d "${head_node}"
+
+      - name: Install luarocks
+        run: sudo apt update && sudo apt install -y luarocks
+
+      - name: Install busted
+        run: sudo luarocks install busted
+
       - name: Install neovim
         run: |
           test -d _neovim || {
@@ -35,17 +43,12 @@ jobs:
             curl -sL "https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz" | tar xzf - --strip-components=1 -C "${PWD}/_neovim"
           }
 
-      - name: Clone the sapling.nvim repo
-        run: sl clone --git https://github.com/AdeAttwood/sapling.nvim.git _sapling.nvim
-
       - name: Run tests
         run: |
           export PATH="${PWD}/_neovim/bin:${PATH}"
           export VIM="${PWD}/_neovim/share/nvim/runtime"
 
-          cd _sapling.nvim
-
           sl config --local ui.logtemplate ' {graphnode} {node|short} {truncatelonglines(desc|firstline, 80)} ({date|age}) <{author|person}> {if(github_pull_request_number, "PR #{github_pull_request_number}")}\n'
 
           nvim --version
-          nvim -l ../lua/sapling_scm_tests/init.lua
+          nvim -l ./lua/sapling_scm_tests/init.lua
