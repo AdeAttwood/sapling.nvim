@@ -54,3 +54,24 @@ describe("bookmark", function()
     end)
   end)
 end)
+
+describe("goto", function()
+  vim.cmd "edit sl://show/."
+  stub(editor_command, "run")
+
+  teardown(function()
+    editor_command.run:revert()
+  end)
+
+  describe("with no bookmark added in the input", function()
+    actions.go_to()
+
+    it("calls the editor command with the correct command", function()
+      assert.stub(editor_command.run).was_called_with(match.has_match "sl goto")
+    end)
+
+    it("calls the editor command passing in the ref flag with a ref", function()
+      assert.stub(editor_command.run).was_called_with(match.has_match "-r '.*'")
+    end)
+  end)
+end)
