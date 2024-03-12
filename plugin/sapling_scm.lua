@@ -18,6 +18,7 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.keymap.set("n", "<CR>", log_actions.show_current_hash, ops)
     vim.keymap.set("n", "<C-e>", log_actions.metaedit, ops)
     vim.keymap.set("n", "<C-c>", log_actions.commit, ops)
+    vim.keymap.set("n", "<C-b>", log_actions.bookmark, ops)
   end,
 })
 
