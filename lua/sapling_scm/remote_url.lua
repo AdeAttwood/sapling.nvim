@@ -1,23 +1,25 @@
 local remote_url = {}
 
----@param head_info HeadInfo
+---@param commit_info CommitInfo
 ---@return string
-local function get_object_ref(head_info)
-  if #head_info.remotenames > 0 then
-    local remote_name, _ = head_info.remotenames[1]:gsub("remote/", "")
+remote_url.get_object_ref = function(commit_info)
+  if #commit_info.remotenames > 0 then
+    local remote_name, _ = commit_info.remotenames[1]:gsub("remote/", "")
     return remote_name
   end
 
-  return head_info.node
+  return commit_info.node
 end
 
----@param head_info HeadInfo
+---@param path string
+---@param ref string
+---@param file string
+---@param start_line number
+---@param end_line number
 ---@return string
-remote_url.blob = function(head_info)
-  local url = head_info.peerurls["default"]:gsub(".git$", "")
-  local object_ref = get_object_ref(head_info)
-
-  return string.format("%s/blob/%s", url, object_ref)
+remote_url.blob = function(path, ref, file, start_line, end_line)
+  local host = path:gsub(".git$", "")
+  return string.format("%s/blob/%s/%s/\\#L%s-L%s", host, ref, file, start_line, end_line)
 end
 
 return remote_url
