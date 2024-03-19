@@ -12,8 +12,10 @@ local LOG_COMMAND = [[sl log -r '%s']]
 -- needed to create URLs.
 --
 ---@return CommitInfo
-client.commit_info = function()
-  local commit_info = vim.fn.system [[sl log -r '.' -T"{dict(remotenames,node,peerurls)|json}"]]
+client.commit_info = function(rev)
+  local commit_info =
+    vim.fn.system(string.format([[sl log -r '.' -T"{dict(remotenames,node,peerurls)|json}"]], rev or "."))
+
   return vim.json.decode(commit_info)
 end
 
