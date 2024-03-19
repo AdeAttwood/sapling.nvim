@@ -61,9 +61,7 @@ vim.api.nvim_create_user_command("Sbrowse", function(props)
   local start_line = props.line1
   local end_line = props.line2
 
-  local defualt_path = client.config "paths.default"
-  local ref = remote_url.get_object_ref(client.commit_info())
-  local url = remote_url.blob(defualt_path, ref, file, start_line, end_line)
+  local url = remote_url.get_url_for_file(file, start_line, end_line)
 
   vim.cmd(string.format("silent !xdg-open %s", url))
 end, { range = true, desc = "Browse the current object on the remote url" })
