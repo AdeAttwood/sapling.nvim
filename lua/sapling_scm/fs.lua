@@ -111,4 +111,4 @@ local handle = function(url, buf)
   end
 end
 
-return { handle = handle }
+return { handle = handle, parse_url = parse_url }
