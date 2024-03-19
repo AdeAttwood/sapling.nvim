@@ -3,7 +3,7 @@ local client = {}
 local SHOW_COMMAND = [[sl show -Tjson '%s']]
 local LOG_COMMAND = [[sl log -r '%s']]
 
----@class HeadInfo
+---@class CommitInfo
 ---@field node string
 ---@field remotenames string[]
 ---@field peerurls { [string]: string }
@@ -11,10 +11,10 @@ local LOG_COMMAND = [[sl log -r '%s']]
 -- Get the head info from the current repo, this is only the minimal info
 -- needed to create URLs.
 --
----@return HeadInfo
-client.head_info = function()
-  local head_info = vim.fn.system [[sl log -r '.' -T"{dict(remotenames,node,peerurls)|json}"]]
-  return vim.json.decode(head_info)
+---@return CommitInfo
+client.commit_info = function()
+  local commit_info = vim.fn.system [[sl log -r '.' -T"{dict(remotenames,node,peerurls)|json}"]]
+  return vim.json.decode(commit_info)
 end
 
 ---@class ShowResult
@@ -97,6 +97,14 @@ client.STATUS_REMOVED = "R"
 ---@return StatusItem[]
 client.status = function()
   return vim.json.decode(vim.fn.system "sl status -Tjson")
+end
+
+-- Gets an entry from the local config. You can pass in the dot separated path
+-- and it will return that value from the users local config of the repo.
+---@param path string
+---@return string
+client.config = function(path)
+  return vim.trim(vim.fn.system("sl config " .. path))
 end
 
 return client
