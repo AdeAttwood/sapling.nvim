@@ -31,5 +31,3 @@ require "plugin.sapling_scm"
 for _, file in ipairs(test_files) do
   require(file:gsub(".lua", ""))
 end
-
-print("Ran " .. #test_files .. " tests.")
