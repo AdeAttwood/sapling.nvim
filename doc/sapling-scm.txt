@@ -65,12 +65,15 @@ Sstatus                                                  *sapling-scm-sstatus*
 
 Put the output of `sl status` in a buffer.
 
-Sannotate                                              *sapling-scm-sannotate*
+Sannotate [rev]                                        *sapling-scm-sannotate*
 
-Put the run the `sl annotate` command and put the output of the command in a
-buffer to the left of the current one. This will use `cursorbind` to keep the
-two buffers in sync and you will be able to see the change the line was part
-of.
+Run the `sl annotate` command and put the output of the command in a buffer to
+the left of the current one. This will use `cursorbind` to keep the two
+buffers in sync and you will be able to see the change the line was part of.
+
+You can pass in an optional rev to annotate, this can be used to skip your
+current rev and get the lines that had changed before what is showing from the
+annotations of the current commit.
 
 Scommit                                                  *sapling-scm-scommit*
 
