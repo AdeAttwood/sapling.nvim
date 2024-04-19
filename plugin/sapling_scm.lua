@@ -54,7 +54,16 @@ vim.api.nvim_create_user_command("Sannotate", function()
   vim.cmd "set cursorbind"
 end, { desc = "Browse the current object on the remote url" })
 
-vim.api.nvim_create_user_command("Scommit", log_actions.commit, { desc = "Commit all your current changes" })
+if os.getenv "TMUX" then
+  vim.api.nvim_create_user_command("Scommit", function(props)
+    vim.cmd("silent !tmux new-window bash -c '\\sl addremove . && \\sl commit -iv " .. props.args .. "'")
+  end, {
+    desc = "Commit all of your changes in a new tmux window. "
+      .. "This will run in interactive move so you can choose your changes",
+  })
+else
+  vim.api.nvim_create_user_command("Scommit", log_actions.commit, { desc = "Commit all your current changes" })
+end
 
 vim.api.nvim_create_user_command("Sbrowse", function(props)
   local file = vim.fn.expand "%"

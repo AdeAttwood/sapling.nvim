@@ -74,10 +74,17 @@ of.
 
 Scommit                                                  *sapling-scm-scommit*
 
-Commit all of your current changes. This will call the commit command and open
-the message file in a new buffer. When the buffer is closed then the commit
-command will continue. The commit command is called with the `-v` flag so all
-of the changes you will be committing will be at the bottom of the buffer.
+Commit all of your current changes. This command has a different behaviour
+depending if you are in tmux or not.
+
+If you are not in tmux, this will call the commit command and open the message
+file in a new buffer. When the buffer is closed then the commit command will
+continue. The commit command is called with the `-v` flag so all of the
+changes you will be committing will be at the bottom of the buffer.
+
+If you are in tmux, this will open a new tmux window and run the commit
+command interactively. You can run though the commit process with the CLI
+tool, this will open a new EDITOR instance when you come to edit.
 
 Sbrowse                                                  *sapling-scm-sbrowse*
 
