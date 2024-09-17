@@ -36,9 +36,14 @@ local parse_url = function(url)
     return { action = "log", pattern = log_matches }
   end
 
-  local diff_matcehs = url:match "sl://diff/(.*)"
-  if diff_matcehs then
-    return { action = "diff", pattern = diff_matcehs }
+  local diff_matches = url:match "sl://diff/(.*)"
+  if diff_matches then
+    return { action = "diff", pattern = diff_matches }
+  end
+
+  local cat_ref, cat_file = url:match "sl://cat/([^/]+)/(.*)"
+  if cat_ref and cat_file then
+    return { action = "cat", commit = cat_ref, file = cat_file }
   end
 
   if url == "sl://status" then
@@ -61,6 +66,15 @@ local handle = function(url, buf)
     return
   end
 
+  if action.action == "cat" then
+    local content = client.cat(action.commit, action.file)
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, content)
+
+    -- This will make sure all of the default autocmds are run on the buffer.
+    -- For example setting the filetype for syntax highlighting.
+    vim.api.nvim_exec_autocmds("BufRead", {})
+  end
+
   if action.action == "show" then
     local commit = client.show(action.commit)
 
@@ -79,7 +93,12 @@ local handle = function(url, buf)
 
     local desc = vim.split(commit.desc, "\n")
     for _, line in ipairs(desc) do
-      vim.api.nvim_buf_set_lines(buf, index, -1, false, { "# " .. line })
+      if #line == 0 then
+        vim.api.nvim_buf_set_lines(buf, index, -1, false, { "#" })
+      else
+        vim.api.nvim_buf_set_lines(buf, index, -1, false, { "# " .. line })
+      end
+
       index = index + 1
     end
 

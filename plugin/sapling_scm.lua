@@ -2,6 +2,7 @@ local client = require "sapling_scm.client"
 local remote_url = require "sapling_scm.remote_url"
 local fs = require "sapling_scm.fs"
 local log_actions = require "sapling_scm.log_actions"
+local coalesce = require "sapling_scm.coalesce"
 
 vim.api.nvim_create_autocmd("BufReadCmd", {
   pattern = { "sl://*" },
@@ -39,8 +40,12 @@ vim.api.nvim_create_user_command("Sstatus", function()
   vim.cmd "edit sl://status"
 end, { desc = "Browse the current object on the remote url" })
 
-vim.api.nvim_create_user_command("Sannotate", function()
-  local width, annotations = client.annotate(".", vim.api.nvim_buf_get_name(0))
+vim.api.nvim_create_user_command("Scat", function(props)
+  vim.cmd(string.format("edit sl://cat/%s/%s", props.fargs[1], props.fargs[2] or vim.fn.expand "%"))
+end, { nargs = "?", desc = "View a file at a revision" })
+
+vim.api.nvim_create_user_command("Sannotate", function(props)
+  local width, annotations = client.annotate(coalesce(props.args, "."), vim.api.nvim_buf_get_name(0))
 
   vim.cmd "set cursorbind"
 
@@ -52,9 +57,18 @@ vim.api.nvim_create_user_command("Sannotate", function()
 
   vim.api.nvim_buf_set_lines(0, 0, -1, false, annotations)
   vim.cmd "set cursorbind"
-end, { desc = "Browse the current object on the remote url" })
+end, { nargs = "?", desc = "Browse the current object on the remote url" })
 
-vim.api.nvim_create_user_command("Scommit", log_actions.commit, { desc = "Commit all your current changes" })
+if os.getenv "TMUX" then
+  vim.api.nvim_create_user_command("Scommit", function(props)
+    vim.cmd("silent !tmux new-window bash -c '\\sl addremove . && \\sl commit -iv " .. props.args .. "'")
+  end, {
+    desc = "Commit all of your changes in a new tmux window. "
+      .. "This will run in interactive move so you can choose your changes",
+  })
+else
+  vim.api.nvim_create_user_command("Scommit", log_actions.commit, { desc = "Commit all your current changes" })
+end
 
 vim.api.nvim_create_user_command("Sbrowse", function(props)
   local file = vim.fn.expand "%"

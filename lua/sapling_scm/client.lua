@@ -45,6 +45,16 @@ client.log_text = function(pattern)
   return vim.fn.systemlist(LOG_COMMAND:format(pattern))
 end
 
+--- Get a file contents at a specific ref.
+--
+---@param ref string The ref to get the file from.
+---@param file string The file path to get.
+---
+---@returns string[]
+client.cat = function(ref, file)
+  return vim.fn.systemlist(string.format("sl cat -r '%s' '%s'", ref, file))
+end
+
 -- Runs `sl annotate` and returns the contents without the line contents. It
 -- will also return the length of the longest item so you can create a window
 -- the same length of its contents. You will also need to specify the ref of
