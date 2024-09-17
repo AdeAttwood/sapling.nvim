@@ -92,3 +92,19 @@ describe("sapling_scm.remote_url.commit", function()
     )
   end)
 end)
+
+describe("remote url integration test", function()
+  local un_stubbed = vim.cmd
+  local match = require "luassert.match"
+
+  before_each(function()
+    vim.cmd("edit " .. os.getenv "PWD" .. "/.github/workflows/test.yml")
+
+    stub(vim, "cmd")
+    un_stubbed "Sbrowse"
+  end)
+
+  it("creates the url from a relative path when the buffer is absolute", function()
+    assert.spy(vim.cmd).was_called_with(match.has_match "/blob/[^/]+/.github/workflows/test.yml")
+  end)
+end)
