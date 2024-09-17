@@ -71,7 +71,7 @@ else
 end
 
 vim.api.nvim_create_user_command("Sbrowse", function(props)
-  local file = vim.fn.expand "%"
+  local file = vim.fn.expand "%:."
   local start_line = props.line1
   local end_line = props.line2
 
