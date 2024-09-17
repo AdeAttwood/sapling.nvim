@@ -59,6 +59,14 @@ describe("Slog", function()
       assert.matches("feat: support showing commits and logging", content)
     end)
   end)
+
+  describe("with no commits", function()
+    run_command "Slog"
+
+    it("uses the default range of the current stack", function()
+      assert.is_equal(vim.fn.expand "%", "sl://log/bottom::top")
+    end)
+  end)
 end)
 
 describe("Sshow", function()

@@ -29,8 +29,8 @@ vim.api.nvim_create_user_command("Sshow", function(props)
 end, { nargs = "+", desc = "Browse the current object on the remote url" })
 
 vim.api.nvim_create_user_command("Slog", function(props)
-  vim.cmd("edit sl://log/" .. props.args)
-end, { nargs = "+", desc = "Browse the current object on the remote url" })
+  vim.cmd("edit sl://log/" .. coalesce(props.args, "bottom::top"))
+end, { nargs = "?", desc = "Browse the current object on the remote url" })
 
 vim.api.nvim_create_user_command("Sdiff", function(props)
   vim.cmd("edit sl://diff/" .. props.args)
