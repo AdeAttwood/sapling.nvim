@@ -93,7 +93,12 @@ local handle = function(url, buf)
 
     local desc = vim.split(commit.desc, "\n")
     for _, line in ipairs(desc) do
-      vim.api.nvim_buf_set_lines(buf, index, -1, false, { "# " .. line })
+      if #line == 0 then
+        vim.api.nvim_buf_set_lines(buf, index, -1, false, { "#" })
+      else
+        vim.api.nvim_buf_set_lines(buf, index, -1, false, { "# " .. line })
+      end
+
       index = index + 1
     end
 

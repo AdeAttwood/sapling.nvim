@@ -80,6 +80,10 @@ describe("Sshow", function()
     it("has the buffer file type set to diff", function()
       assert.is_equal("diff", vim.bo.filetype)
     end)
+
+    it("does not have tailing whitespace at the end of the new lines in the description", function()
+      assert.matches("#\n", content)
+    end)
   end)
 end)
 
