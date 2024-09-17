@@ -39,12 +39,15 @@ Sshow will run `sl show` command with the provided node id. This will put the
 output in a new buffer with the commit description at the top in comments. The
 buffer will have the file type of diff to give you the highlighting.
 
-Slog {revset}                                               *sapling-scm-slog*
+Slog [revset]                                               *sapling-scm-slog*
 
 Run the log command and put the command output into a new buffer. You can
 supply a revset that will be used to filter the log. For now this will use the
 default output of the log command so the output template can be configured
 with `ui.logtemplate` in your sapling config.
+
+Running the log command with no revset will use the default revset of
+`bottom::top` to focus the log to your current stack.
 
 If you have `baleia.nvim` installed all the ANSI escape sequences will be
 colorized in your output as they would in the terminal so you can keep your
