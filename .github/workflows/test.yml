@@ -51,7 +51,5 @@ jobs:
           export PATH="${PWD}/_neovim/bin:${PATH}"
           export VIM="${PWD}/_neovim/share/nvim/runtime"
 
-          sl config --local ui.logtemplate ' {graphnode} {node|short} {truncatelonglines(desc|firstline, 80)} ({date|age}) <{author|person}> {if(github_pull_request_number, "PR #{github_pull_request_number}")}\n'
-
           nvim --version
           nvim -l ./lua/sapling_scm_tests/init.lua
