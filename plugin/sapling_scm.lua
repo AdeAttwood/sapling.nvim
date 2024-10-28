@@ -1,4 +1,5 @@
 local client = require "sapling_scm.client"
+local config = require "sapling_scm.config"
 local remote_url = require "sapling_scm.remote_url"
 local fs = require "sapling_scm.fs"
 local log_actions = require "sapling_scm.log_actions"
@@ -16,15 +17,13 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = "saplinglog",
   callback = function(args)
     local ops = { noremap = true, silent = true, nowait = true, buffer = args.buf }
-    vim.keymap.set("n", "<CR>", log_actions.show_current_hash, ops)
-    vim.keymap.set("n", "<C-r>", log_actions.rebase_reorder, ops)
-    vim.keymap.set("n", "<C-u>", log_actions.undo, ops)
-    vim.keymap.set("n", "<C-f>", log_actions.rebase_roll, ops)
-    vim.keymap.set("n", "<C-e>", log_actions.metaedit, ops)
-    vim.keymap.set("n", "<C-c>", log_actions.commit, ops)
-    vim.keymap.set("n", "<C-b>", log_actions.bookmark, ops)
-    vim.keymap.set("n", "<C-m>", log_actions.bookmark, ops)
-    vim.keymap.set("n", "<C-g>", log_actions.go_to, ops)
+
+    local mappings = config:get { "log_action_mappings" }
+    assert(mappings, "Log actions config has not been set, what has happened here?")
+
+    for key, action in pairs(mappings) do
+      vim.keymap.set("n", key, log_actions[action], ops)
+    end
   end,
 })
 
