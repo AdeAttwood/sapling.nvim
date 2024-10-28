@@ -35,4 +35,37 @@ actions.commit = function()
   editor_command.run "sl commit -v"
 end
 
+actions.undo = function()
+  editor_command.run "sl undo"
+end
+
+local rebase = function(action)
+  return function()
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+
+    local tmp_file = os.tmpname() .. ".sapling-rebase"
+    local f = io.open(tmp_file, "w")
+    if not f then
+      return false
+    end
+
+    for _, line in ipairs(lines) do
+      if line == vim.api.nvim_get_current_line() then
+        f:write(action)
+      else
+        f:write "pick"
+      end
+
+      f:write(line:sub(3, -1) .. "\n")
+    end
+
+    f:close()
+
+    editor_command.run(string.format("sl histedit --commands '%s'", tmp_file))
+  end
+end
+
+actions.rebase_reorder = rebase "pick"
+actions.rebase_roll = rebase "roll"
+
 return actions
