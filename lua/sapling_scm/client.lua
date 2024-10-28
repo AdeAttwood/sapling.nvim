@@ -1,7 +1,10 @@
 local client = {}
 
 local SHOW_COMMAND = [[sl show -Tjson '%s']]
-local LOG_COMMAND = [[sl log -r '%s']]
+local LOG_TEMPLATE =
+  --luacheck: no max line length
+  [[ {graphnode} {ifeq(phase, "public", "\033[31m", "\033[34m")}{node|short}\033[0m {truncatelonglines(desc|firstline, 80)} \033[32m({date|age}) \033[34;1m<{author|person}>{if(github_pull_request_number, " \033[31mPR #{github_pull_request_number}")}\033[0m{if(bookmarks, " [{bookmarks}]")}\n]]
+local LOG_COMMAND = [[sl log -T'%s' -r '%s']]
 
 ---@class CommitInfo
 ---@field node string
@@ -42,7 +45,7 @@ end
 --
 ---@return string[]
 client.log_text = function(pattern)
-  return vim.fn.systemlist(LOG_COMMAND:format(pattern))
+  return vim.fn.systemlist(LOG_COMMAND:format(LOG_TEMPLATE, pattern))
 end
 
 --- Get a file contents at a specific ref.
