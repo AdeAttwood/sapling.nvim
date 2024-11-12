@@ -27,6 +27,20 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "saplingsmartlog",
+  callback = function(args)
+    local ops = { noremap = true, silent = true, nowait = true, buffer = args.buf }
+
+    local mappings = config:get { "smartlog_log_action_mappings" }
+    assert(mappings, "Smart log actions config has not been set, what has happened here?")
+
+    for key, action in pairs(mappings) do
+      vim.keymap.set("n", key, log_actions[action], ops)
+    end
+  end,
+})
+
 vim.api.nvim_create_user_command("Sshow", function(props)
   vim.cmd("edit sl://show/" .. props.args)
 end, { nargs = "+", desc = "Browse the current object on the remote url" })
@@ -34,6 +48,10 @@ end, { nargs = "+", desc = "Browse the current object on the remote url" })
 vim.api.nvim_create_user_command("Slog", function(props)
   vim.cmd("edit sl://log/" .. coalesce(props.args, "bottom::top"))
 end, { nargs = "?", desc = "Browse the current object on the remote url" })
+
+vim.api.nvim_create_user_command("S", function()
+  vim.cmd "edit sl://smartlog"
+end, { desc = "The sapling smartlog" })
 
 vim.api.nvim_create_user_command("Sdiff", function(props)
   vim.cmd("edit sl://diff/" .. props.args)

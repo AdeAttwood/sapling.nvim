@@ -26,6 +26,10 @@ end
 ---@param url string
 ---@return ShowAction | LogAction | nil
 local parse_url = function(url)
+  if url == "sl://smartlog" then
+    return { action = "smartlog" }
+  end
+
   local show_matches = url:match "sl://show/(.*)"
   if show_matches then
     return { action = "show", commit = show_matches }
@@ -109,6 +113,14 @@ local handle = function(url, buf)
     local log = client.log_text(action.pattern)
 
     vim.api.nvim_buf_set_option(buf, "filetype", "saplinglog")
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, log)
+    highlight_buffer(buf)
+  end
+
+  if action.action == "smartlog" then
+    local log = client.smartlog_text()
+
+    vim.api.nvim_buf_set_option(buf, "filetype", "saplingsmartlog")
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, log)
     highlight_buffer(buf)
   end

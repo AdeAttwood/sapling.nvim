@@ -21,6 +21,9 @@ end
 local config = { user_config = {} }
 
 config.default_config = {
+  smartlog_log_action_mappings = {
+    ["<CR>"] = "show_current_hash",
+  },
   log_action_mappings = {
     ["<CR>"] = "show_current_hash",
     ["<C-r>"] = "rebase_reorder",
