@@ -2,6 +2,7 @@ local client = require "sapling_scm.client"
 local config = require "sapling_scm.config"
 local remote_url = require "sapling_scm.remote_url"
 local fs = require "sapling_scm.fs"
+local editor_command = require "sapling_scm.editor_command"
 local log_actions = require "sapling_scm.log_actions"
 local coalesce = require "sapling_scm.coalesce"
 
@@ -100,3 +101,11 @@ vim.api.nvim_create_user_command("Sbrowse", function(props)
 
   vim.cmd(string.format("silent !xdg-open %s", url))
 end, { range = true, desc = "Browse the current object on the remote url" })
+
+vim.api.nvim_create_user_command("Sl", function(props)
+  if not props.args or props.args == "" then
+    return editor_command.terminal "sl"
+  end
+
+  editor_command.terminal("sl " .. coalesce(props.args, ""))
+end, { nargs = "?", desc = "Run a sl command" })

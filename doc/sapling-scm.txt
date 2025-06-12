@@ -5,13 +5,14 @@ CONTENTS                                                *sapling-scm-contents*
 
 1. Intro                                                   |sapling-scm-intro|
 2. Commands                                             |sapling-scm-commands|
-  2.1 Sshow                                                |sapling-scm-sshow|
-  2.2 Slog                                                  |sapling-scm-slog|
-  2.3 Sdiff                                                |sapling-scm-sdiff|
-  2.4 Sstatus                                            |sapling-scm-sstatus|
-  2.5 Sannotate                                        |sapling-scm-sannotate|
-  2.6 Scommit                                            |sapling-scm-scommit|
-  2.7 Sbrowse                                            |sapling-scm-sbrowse|
+  2.1 Sl                                                      |sapling-scm-sl|
+  2.2 Sshow                                                |sapling-scm-sshow|
+  2.3 Slog                                                  |sapling-scm-slog|
+  2.4 Sdiff                                                |sapling-scm-sdiff|
+  2.5 Sstatus                                            |sapling-scm-sstatus|
+  2.6 Sannotate                                        |sapling-scm-sannotate|
+  2.7 Scommit                                            |sapling-scm-scommit|
+  2.8 Sbrowse                                            |sapling-scm-sbrowse|
 3. Log Actions                                       |sapling-scm-log-actions|
   3.1 View                                              |sapling-scm-log-view|
   3.2 Metaedit                                      |sapling-scm-log-metaedit|
@@ -32,6 +33,13 @@ isl built into sapling.
 
 ==============================================================================
 COMMANDS                                                *sapling-scm-commands*
+
+Sl [args]                                                     *sapling-scm-sl*
+
+Run any sl command inside nvim. Opens up a terminal in a new tab, any
+interactive command can be done inside this terminal. If you are required to
+edit a file, another tab will open with the file, after you close this file
+the terminal command will continue.
 
 Sshow {node}                                               *sapling-scm-sshow*
 

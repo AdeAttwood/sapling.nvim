@@ -27,9 +27,9 @@ end
 -- Edits a file in the current nvim process and calls on_close when the buffer
 -- is closed.
 local edit_in_vim = function(file, on_close)
-  vim.cmd("edit " .. file)
+  vim.cmd("tabnew | edit " .. file)
 
-  vim.api.nvim_create_autocmd("BufUnload", {
+  vim.api.nvim_create_autocmd({ "BufUnload", "BufDelete", "TabClosed" }, {
     buffer = 0,
     callback = on_close,
   })
@@ -62,6 +62,49 @@ editor_command.run = function(command)
       end
     end,
   })
+end
+
+editor_command.terminal = function(command)
+  -- If we are on a sapling buffer when we run the terminal command, then we
+  -- want to reload it when we are done running the command. The view may have
+  -- changed like the log buffer.
+  local buffer_name = vim.api.nvim_buf_get_name(0)
+  if string.match(buffer_name, "^sl://") then
+    local cmd_id = nil
+    cmd_id = vim.api.nvim_create_autocmd({ "BufEnter" }, {
+      buffer = 0,
+      callback = function()
+        vim.schedule(function()
+          vim.cmd("edit " .. buffer_name)
+        end)
+
+        vim.api.nvim_del_autocmd(cmd_id)
+      end,
+    })
+  end
+
+  local tmp_file = os.tmpname() .. ".sapling-nvim"
+
+  write_file(tmp_file, string.format(edit_script, tmp_file))
+
+  vim.cmd "tabnew"
+
+  vim.fn.termopen(command, {
+    env = { EDITOR = "sh " .. tmp_file },
+    on_stdout = function(_, data)
+      for _, v in ipairs(data) do
+        local file = string.match(v, "sapling_edit:(.*)")
+        if file then
+          edit_in_vim(file, function()
+            write_file(tmp_file .. ".exit", "")
+          end)
+        end
+      end
+    end,
+  })
+
+  vim.cmd "file term://sapling"
+  vim.cmd "startinsert"
 end
 
 return editor_command
