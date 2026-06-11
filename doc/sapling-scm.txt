@@ -47,6 +47,9 @@ Sshow will run `sl show` command with the provided node id. This will put the
 output in a new buffer with the commit description at the top in comments. The
 buffer will have the file type of diff to give you the highlighting.
 
+While your cursor is on the diff, `gd` will open the file from the shown
+revision at the matching new-side line.
+
 Slog [revset]                                               *sapling-scm-slog*
 
 Run the log command and put the command output into a new buffer. You can
@@ -71,6 +74,9 @@ Sdiff [node]                                               *sapling-scm-sdiff*
 Display the output of the diff command in a buffer. If no arguments are passed
 in then it will show the diff of the current changes. Any arguments passed are
 forwarded to the diff command.
+
+While your cursor is on the diff, `gd` will open the working tree file at the
+matching new-side line.
 
 Sstatus                                                  *sapling-scm-sstatus*
 
