@@ -66,6 +66,10 @@ vim.api.nvim_create_user_command("Scat", function(props)
   vim.cmd(string.format("edit sl://cat/%s/%s", props.fargs[1], props.fargs[2] or vim.fn.expand "%"))
 end, { nargs = "?", desc = "View a file at a revision" })
 
+vim.api.nvim_create_user_command("Sedit", function()
+  require("sapling_scm.diff_jump").edit_working_copy()
+end, { desc = "Open the working copy for the current Sapling buffer location" })
+
 vim.api.nvim_create_user_command("Sannotate", function(props)
   local width, annotations = client.annotate(coalesce(props.args, "."), vim.api.nvim_buf_get_name(0))
 
