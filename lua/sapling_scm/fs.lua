@@ -13,6 +13,29 @@ local highlight_buffer = function(buf)
   end
 end
 
+---@param buf integer
+---@param action string
+---@param commit string | nil
+local configure_diff_buffer = function(buf, action, commit)
+  vim.api.nvim_buf_set_var(buf, "sapling_diff_action", action)
+
+  if commit then
+    vim.api.nvim_buf_set_var(buf, "sapling_show_commit", commit)
+  else
+    pcall(vim.api.nvim_buf_del_var, buf, "sapling_show_commit")
+  end
+
+  vim.keymap.set("n", "gd", function()
+    require("sapling_scm.diff_jump").jump()
+  end, {
+    noremap = true,
+    silent = true,
+    nowait = true,
+    buffer = buf,
+    desc = "Jump to the new-side location from the current sapling diff",
+  })
+end
+
 ---@alias action "show" | "log"
 
 ---@class ShowAction
@@ -83,6 +106,7 @@ local handle = function(url, buf)
     local commit = client.show(action.commit)
 
     vim.api.nvim_buf_set_option(buf, "filetype", "diff")
+    configure_diff_buffer(buf, "show", commit.node)
 
     local header = {
       "# Node: " .. commit.node,
@@ -128,6 +152,7 @@ local handle = function(url, buf)
   if action.action == "diff" then
     local diff = client.diff(action.pattern)
     vim.api.nvim_buf_set_option(buf, "filetype", "diff")
+    configure_diff_buffer(buf, "diff", nil)
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, diff)
   end
 
