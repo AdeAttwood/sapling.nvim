@@ -1,3 +1,5 @@
+local client = require "sapling_scm.client"
+
 local diff_jump = {}
 
 local normalize_diff_path = function(path)
@@ -159,22 +161,27 @@ function diff_jump.location_from_lines(lines, cursor_line)
 end
 
 ---@param buf integer
----@return { action: string, commit: string | nil } | nil
+---@return { action: string, commit: string | nil, file: string | nil } | nil
 local get_buffer_source = function(buf)
   local ok_action, action = pcall(vim.api.nvim_buf_get_var, buf, "sapling_diff_action")
   if ok_action and action then
     local ok_commit, commit = pcall(vim.api.nvim_buf_get_var, buf, "sapling_show_commit")
-    return { action = action, commit = ok_commit and commit or nil }
+    return { action = action, commit = ok_commit and commit or nil, file = nil }
   end
 
   local name = vim.api.nvim_buf_get_name(buf)
   local show_commit = name:match "^sl://show/(.*)$"
   if show_commit then
-    return { action = "show", commit = show_commit }
+    return { action = "show", commit = show_commit, file = nil }
   end
 
   if name:match "^sl://diff/" then
-    return { action = "diff", commit = nil }
+    return { action = "diff", commit = nil, file = nil }
+  end
+
+  local _, cat_file = name:match "^sl://cat/([^/]+)/(.*)$"
+  if cat_file then
+    return { action = "cat", commit = nil, file = cat_file }
   end
 
   return nil
@@ -185,7 +192,7 @@ end
 ---@return { action: string, file: string, line: number, path: string | nil, url: string | nil } | nil, string | nil
 function diff_jump.target_from_buffer(buf, cursor_line)
   local source = get_buffer_source(buf)
-  if not source then
+  if not source or source.action == "cat" then
     return nil, "not a sapling diff buffer"
   end
 
@@ -218,6 +225,30 @@ function diff_jump.target_from_buffer(buf, cursor_line)
     url = nil,
   },
     nil
+end
+
+---@param buf integer
+---@param cursor_line number
+---@return { file: string, line: number } | nil, string | nil
+function diff_jump.working_copy_target_from_buffer(buf, cursor_line)
+  local source = get_buffer_source(buf)
+  if not source then
+    return nil, "not a sapling buffer"
+  end
+
+  if source.action == "cat" then
+    if not source.file then
+      return nil, "no file found for this buffer"
+    end
+
+    return {
+      file = source.file,
+      line = cursor_line,
+    }, nil
+  end
+
+  local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+  return diff_jump.location_from_lines(lines, cursor_line)
 end
 
 ---@param current_win integer
@@ -255,6 +286,38 @@ local set_cursor = function(line_number)
   vim.api.nvim_win_set_cursor(0, { clamped, 0 })
 end
 
+---@param file string
+---@return string | nil, string | nil
+local resolve_working_copy_path = function(file)
+  local root = client.root()
+  if not root or root == "" then
+    return nil, "could not determine repository root"
+  end
+
+  local path = vim.fn.simplify(root .. "/" .. file)
+  if vim.fn.filereadable(path) ~= 1 then
+    return nil, "working copy file not found: " .. file
+  end
+
+  return path, nil
+end
+
+---@param destination_window integer
+---@param target { file: string, line: number }
+---@return boolean, string | nil
+local open_working_copy_target = function(destination_window, target)
+  local path, err = resolve_working_copy_path(target.file)
+  if not path then
+    return false, err
+  end
+
+  vim.api.nvim_set_current_win(destination_window)
+  vim.cmd("edit " .. vim.fn.fnameescape(path))
+  set_cursor(target.line)
+
+  return true, nil
+end
+
 function diff_jump.jump()
   local cursor = vim.api.nvim_win_get_cursor(0)
   local target, err = diff_jump.target_from_buffer(vim.api.nvim_get_current_buf(), cursor[1])
@@ -263,21 +326,46 @@ function diff_jump.jump()
     return false
   end
 
-  vim.api.nvim_set_current_win(find_destination_window(vim.api.nvim_get_current_win()))
+  local destination_window = find_destination_window(vim.api.nvim_get_current_win())
 
   if target.action == "show" and target.url then
+    vim.api.nvim_set_current_win(destination_window)
     vim.cmd("edit " .. vim.fn.fnameescape(target.url))
     set_cursor(target.line)
     return true
   end
 
-  if target.path then
-    vim.cmd("edit " .. vim.fn.fnameescape(target.path))
-    set_cursor(target.line)
-    return true
+  if target.file then
+    local ok, open_err = open_working_copy_target(destination_window, {
+      file = target.file,
+      line = target.line,
+    })
+    if ok then
+      return true
+    end
+
+    vim.notify("Sapling: " .. open_err, vim.log.levels.INFO)
+    return false
   end
 
   vim.notify("Sapling: no jump target found", vim.log.levels.INFO)
+  return false
+end
+
+function diff_jump.edit_working_copy()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local target, err = diff_jump.working_copy_target_from_buffer(vim.api.nvim_get_current_buf(), cursor[1])
+  if not target then
+    vim.notify("Sapling: " .. err, vim.log.levels.INFO)
+    return false
+  end
+
+  local ok, open_err = open_working_copy_target(find_destination_window(vim.api.nvim_get_current_win()), target)
+  if ok then
+    return true
+  end
+
+  vim.notify("Sapling: " .. open_err, vim.log.levels.INFO)
   return false
 end
 

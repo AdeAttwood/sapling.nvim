@@ -13,6 +13,7 @@ CONTENTS                                                *sapling-scm-contents*
   2.6 Sannotate                                        |sapling-scm-sannotate|
   2.7 Scommit                                            |sapling-scm-scommit|
   2.8 Sbrowse                                            |sapling-scm-sbrowse|
+  2.9 Sedit                                                |sapling-scm-sedit|
 3. Log Actions                                       |sapling-scm-log-actions|
   3.1 View                                              |sapling-scm-log-view|
   3.2 Metaedit                                      |sapling-scm-log-metaedit|
@@ -115,6 +116,15 @@ be inferred from your current remote name that is linked to your current
 commit, falling back to the node.
 
 NOTE: Currently only GitHub is supported
+
+Sedit                                                      *sapling-scm-sedit*
+
+Open the working copy for the file under your cursor.
+
+From a `Scat` buffer it will open the same file at the current line.
+
+From `Sshow` and `Sdiff` diff buffers it will open the working copy file at
+the matching new-side line.
 
 ==============================================================================
 LOG ACTIONS                                          *sapling-scm-log-actions*

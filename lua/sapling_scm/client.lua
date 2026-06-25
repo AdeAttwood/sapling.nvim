@@ -122,6 +122,16 @@ client.status = function()
   return vim.json.decode(vim.fn.system "sl status -Tjson")
 end
 
+---@return string | nil
+client.root = function()
+  local root = vim.trim(vim.fn.system "sl root")
+  if vim.v.shell_error ~= 0 then
+    return nil
+  end
+
+  return root
+end
+
 -- Gets an entry from the local config. You can pass in the dot separated path
 -- and it will return that value from the users local config of the repo.
 ---@param path string

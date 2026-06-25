@@ -1,5 +1,6 @@
 require "sapling_scm_tests.setup"
 
+local client = require "sapling_scm.client"
 local diff_jump = require "sapling_scm.diff_jump"
 
 local find_line_number = function(lines, needle)
@@ -22,6 +23,22 @@ local create_buffer = function(name, lines, vars)
   end
 
   return buf
+end
+
+local run_with_cwd = function(path, callback)
+  local previous_cwd = vim.fn.getcwd()
+  local ok, result = xpcall(function()
+    vim.cmd("cd " .. vim.fn.fnameescape(path))
+    return callback()
+  end, debug.traceback)
+
+  vim.cmd("cd " .. vim.fn.fnameescape(previous_cwd))
+
+  if not ok then
+    error(result)
+  end
+
+  return result
 end
 
 describe("diff_jump.location_from_lines", function()
@@ -116,6 +133,22 @@ describe("diff_jump.target_from_buffer", function()
   end)
 end)
 
+describe("diff_jump.working_copy_target_from_buffer", function()
+  it("builds a working copy target for Scat buffers", function()
+    local buf = create_buffer("sl://cat/abcdef123456/lua/test.lua", {
+      "local test = true",
+      "return test",
+    })
+
+    local target = assert(diff_jump.working_copy_target_from_buffer(buf, 2))
+
+    assert.are.same({
+      file = "lua/test.lua",
+      line = 2,
+    }, target)
+  end)
+end)
+
 describe("diff_jump.jump", function()
   describe("from Sdiff", function()
     vim.fn.system "echo 'This is a line added' >> README.md"
@@ -140,6 +173,28 @@ describe("diff_jump.jump", function()
     end)
   end)
 
+  it("opens the working tree file away from the repo root", function()
+    local root = assert(client.root())
+    local expected_line = assert(vim.fn.readfile(root .. "/doc/sapling-scm.txt")[1])
+    local buf = create_buffer("sl://diff/root-aware", {
+      "diff --git a/doc/sapling-scm.txt b/doc/sapling-scm.txt",
+      "--- a/doc/sapling-scm.txt",
+      "+++ b/doc/sapling-scm.txt",
+      "@@ -1 +1 @@",
+      "+" .. expected_line,
+    })
+
+    run_with_cwd(root .. "/doc", function()
+      vim.api.nvim_set_current_buf(buf)
+      vim.api.nvim_win_set_cursor(0, { 5, 0 })
+
+      assert.is_true(diff_jump.jump())
+    end)
+
+    assert.is_truthy(vim.api.nvim_buf_get_name(0):match "/doc/sapling%-scm.txt$")
+    assert.is_equal(expected_line, vim.api.nvim_get_current_line())
+  end)
+
   describe("from Sshow", function()
     vim.cmd "Sshow f5bdd00322fe"
 
@@ -156,5 +211,38 @@ describe("diff_jump.jump", function()
     it("jumps to the matching line", function()
       assert.is_equal("local client = {}", vim.api.nvim_get_current_line())
     end)
+  end)
+end)
+
+describe("Sedit", function()
+  it("opens the working copy file from Sshow", function()
+    local root = assert(client.root())
+
+    run_with_cwd(root .. "/doc", function()
+      vim.cmd "Sshow f5bdd00322fe"
+
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      local line_number = assert(find_line_number(lines, "+local client = {}"))
+      vim.api.nvim_win_set_cursor(0, { line_number, 0 })
+
+      vim.cmd "Sedit"
+    end)
+
+    assert.matches("/lua/sapling_scm/client.lua$", vim.api.nvim_buf_get_name(0))
+    assert.is_equal("local client = {}", vim.api.nvim_get_current_line())
+  end)
+
+  it("opens the working copy file from Scat", function()
+    local root = assert(client.root())
+
+    run_with_cwd(root .. "/doc", function()
+      vim.cmd "edit sl://cat/f5bdd00322fe/lua/sapling_scm/client.lua"
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+
+      vim.cmd "Sedit"
+    end)
+
+    assert.matches("/lua/sapling_scm/client.lua$", vim.api.nvim_buf_get_name(0))
+    assert.is_equal("local client = {}", vim.api.nvim_get_current_line())
   end)
 end)
