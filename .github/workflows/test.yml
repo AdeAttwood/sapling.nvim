@@ -10,20 +10,31 @@ jobs:
     strategy:
       matrix:
         download: ["v0.9.5/nvim-linux64.tar.gz", "stable/nvim-linux-x86_64.tar.gz", "nightly/nvim-linux-x86_64.tar.gz"]
+        sapling:
+          - name: latest
+            latest: "true"
+            tag: ""
+          - name: "0.2.20260317-201835+0234c21f"
+            latest: "false"
+            tag: "0.2.20260317-201835+0234c21f"
     runs-on: ubuntu-22.04
     steps:
       - name: Download sapling
         uses: robinraju/release-downloader@v1.9
         with:
           repository: "facebook/sapling"
-          latest: true
-          fileName: "*amd64.Ubuntu22.04.deb"
+          latest: ${{ matrix.sapling.latest }}
+          tag: ${{ matrix.sapling.tag }}
+          fileName: "*linux-x64.tar.xz"
 
       - name: Install sapling
-        run: sudo dpkg --install *.deb
+        run: |
+          mkdir -p "${RUNNER_TEMP}/sapling"
+          tar -xJf ./*.tar.xz -C "${RUNNER_TEMP}/sapling"
+          echo "${RUNNER_TEMP}/sapling" >> "${GITHUB_PATH}"
 
-      - name: Clean up the sapling deb file
-        run: rm ./*.deb
+      - name: Clean up the sapling archive
+        run: rm ./*.tar.xz
 
       - name: Clone the repo
         run: |
